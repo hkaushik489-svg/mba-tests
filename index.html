@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>MBA Test Platform — Offline v1</title>
+
+  <!-- Google font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f4f6ff;
+      --card:#ffffff;
+      --primary:#4f46e5;
+      --accent:#6366f1;
+      --muted:#6b7280;
+      --success:#16a34a;
+      --danger:#dc2626;
+      --shadow: 0 10px 30px rgba(32,33,61,0.08);
+      --radius:12px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,Arial,sans-serif;
+      background: linear-gradient(180deg, #f6f7ff 0%, #eef2ff 100%);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    header{
+      background: linear-gradient(90deg,var(--primary),var(--accent));
+      color:white;
+      padding:18px 28px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      box-shadow: 0 6px 20px rgba(79,70,229,0.12);
+    }
+    header .title{font-weight:700; font-size:20px}
+    header .nav{display:flex;align-items:center;gap:10px}
+    header button{
+      background: rgba(255,255,255,0.12);
+      color:white;border:none;padding:8px 12px;border-radius:10px;cursor:pointer;
+    }
+    header button:hover{background: rgba(255,255,255,0.24);}
+
+    .layout{max-width:1100px;margin:30px auto;padding:0 18px}
+    .grid{display:grid;grid-template-columns: 340px 1fr; gap:22px}
+    .card{
+      background:var(--card); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);
+    }
+
+    /* left column */
+    .left .small{color:var(--muted);font-size:0.92rem}
+    .profileEmail{font-weight:600;color:#0b1220}
+    .btn-primary{
+      background:var(--primary); color:white; border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600;
+    }
+    .btn-ghost{background:#f1f3ff;border:none;padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--primary);}
+
+    /* right column (main) */
+    .section{display:none}
+    .section.active{display:block}
+    h2{margin:0 0 8px 0}
+    label{display:block;margin-top:12px;font-size:0.95rem;color:var(--muted)}
+    input[type="text"], input[type="email"], input[type="password"], select, textarea {
+      width:100%; padding:10px 12px;margin-top:6px;border-radius:10px;border:1px solid #e6e9fb;background:#fbfcff;
+    }
+    .row{display:flex;gap:10px}
+    .row > *{flex:1}
+    .muted{color:var(--muted);font-size:0.9rem}
+    .options button{
+      display:block;width:100%;text-align:left;padding:12px;border-radius:10px;border:1px solid #e8e9ff;background:#fbfdff;margin-top:10px;cursor:pointer;
+    }
+    .options button.selected{background:#eef2ff;border-color:var(--primary)}
+    .qmeta{font-size:0.86rem;color:var(--muted);margin-bottom:6px}
+
+    .controls{display:flex;gap:8px;margin-top:14px;align-items:center}
+    .controls .spacer{flex:1}
+    .pill{background:#f1f5ff;padding:6px 10px;border-radius:999px;color:var(--primary);font-weight:600}
+
+    .timer{font-weight:700;color:var(--danger)}
+    .history-item{border-top:1px solid #f1f3ff;padding:10px 0;margin-top:8px}
+    .leaderboard-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #fbfbfb}
+
+    footer{max-width:1100px;margin:18px auto 60px;padding:0 18px;color:var(--muted);font-size:0.9rem;text-align:center}
+    @media(max-width:900px){
+      .grid{grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="title">MBA Test Platform — Offline (Phase 1)</div>
+  <div class="nav">
+    <div id="navEmail" style="font-weight:600; margin-right:6px; color:rgba(255,255,255,0.95)"></div>
+    <button id="btnHome">Home</button>
+    <button id="btnDashboard">Dashboard</button>
+    <button id="btnLogout" style="display:none">Logout</button>
+  </div>
+</header>
+
+<main class="layout">
+  <div class="grid">
+    <!-- LEFT COLUMN -->
+    <aside class="card left">
+      <div id="authBox">
+        <div id="guestView">
+          <div style="margin-bottom:10px">
+            <div style="font-weight:700">Welcome</div>
+            <div class="muted">Register or login to save attempts and see leaderboard.</div>
+          </div>
+
+          <label>Full name</label>
+          <input id="inpName" type="text" placeholder="Your full name">
+
+          <label>Email</label>
+          <input id="inpEmail" type="email" placeholder="you@example.com">
+
+          <label>Password</label>
+          <input id="inpPass" type="password" placeholder="Choose a password">
+
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="btn-primary" id="btnRegister">Register</button>
+            <button class="btn-ghost" id="btnShowLogin">Login</button>
+          </div>
+          <div id="authMsg" class="muted" style="margin-top:10px"></div>
+        </div>
+
+        <div id="loginView" style="display:none">
+          <label>Email</label>
+          <input id="loginEmail" type="email" placeholder="you@example.com">
+          <label>Password</label>
+          <input id="loginPass" type="password" placeholder="Your password">
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="btn-primary" id="btnLogin">Login</button>
+            <button class="btn-ghost" id="btnShowRegister">Back</button>
+          </div>
+          <div id="loginMsg" class="muted" style="margin-top:10px"></div>
+        </div>
+      </div>
+
+      <div id="userBox" style="display:none">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:white;font-weight:700" id="avatar">U</div>
+          <div>
+            <div class="profileEmail" id="profileName">User Name</div>
+            <div class="muted" id="profileEmail">email@example.com</div>
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <div class="muted">Quick Actions</div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn-primary" id="btnStart">Create Test</button>
+            <button class="btn-ghost" id="btnHistory">History</button>
+          </div>
+        </div>
+
+        <div style="margin-top:18px">
+          <div class="muted">Leaderboard</div>
+          <div id="leaderboardBox" style="margin-top:8px"></div>
+        </div>
+
+        <div style="margin-top:18px">
+          <button id="btnLogout2" style="background:#fff;border:1px solid #eef2ff;padding:8px 10px;border-radius:10px;cursor:pointer">Logout</button>
+        </div>
+      </div>
+
+      <div style="margin-top:18px" class="muted">Tip: This is local demo mode. Later you can migrate to Firebase for real accounts.</div>
+    </aside>
+
+    <!-- RIGHT COLUMN -->
+    <section class="card right">
+      <!-- HOME / DASHBOARD -->
+      <div id="homeSection" class="section active">
+        <h2>Dashboard</h2>
+        <div class="muted">Create a random test following CAT pattern or customize sections & time.</div>
+
+        <div style="margin-top:14px">
+          <label>Choose difficulty profile</label>
+          <select id="selDifficulty">
+            <option value="easy">Easy (mostly easy)</option>
+            <option value="medium" selected>Medium (balanced)</option>
+            <option value="hard">Hard (challenging)</option>
+          </select>
+        </div>
+
+        <div style="margin-top:12px" class="row">
+          <div>
+            <label>Preset pattern</label>
+            <select id="selPattern">
+              <option value="cat">CAT (VARC:24, DILR:20, QA:22)</option>
+              <option value="mini">Mini (VARC:6, DILR:5, QA:6)</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div id="customCounts" style="display:none">
+            <label>VARC / DILR / QA</label>
+            <div class="row">
+              <input id="inpVarc" type="text" placeholder="24">
+              <input id="inpDlr" type="text" placeholder="20">
+              <input id="inpQa" type="text" placeholder="22">
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="row">
+          <div>
+            <label>Test duration (minutes)</label>
+            <input id="inpMinutes" type="text" placeholder="120" value="120">
+          </div>
+          <div>
+            <label>Shuffle order</label>
+            <select id="selShuffle">
+              <option value="true" selected>Yes</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:14px" class="controls">
+          <button class="btn-primary" id="btnCreateTest">Generate & Start Test</button>
+          <div class="spacer"></div>
+          <div class="pill" id="statCount">Questions: 0</div>
+        </div>
+      </div>
+
+      <!-- TEST PAGE -->
+      <div id="testSection" class="section">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <h2 id="testTitle">Test</h2>
+            <div class="muted" id="testMeta">Section • Difficulty</div>
+          </div>
+          <div style="text-align:right">
+            <div class="muted">Time left</div>
+            <div class="timer" id="timerDisplay">00:00:00</div>
+            <div style="margin-top:8px" class="muted">Q <span id="curQ">1</span> / <span id="totalQ">0</span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" id="questionContainer"></div>
+
+        <div class="controls" style="margin-top:14px;">
+          <button class="btn-ghost" id="btnPrev">Prev</button>
+          <button class="btn-ghost" id="btnNext">Next</button>
+          <div class="spacer"></div>
+          <button class="btn-primary" id="btnSubmit">Submit Test</button>
+        </div>
+      </div>
+
+      <!-- RESULTS PAGE -->
+      <div id="resultsSection" class="section">
+        <h2>Results</h2>
+        <div id="resultsBox" class="muted"></div>
+        <div style="margin-top:12px" id="resultsDetails"></div>
+        <div style="margin-top:14px; display:flex; gap:8px;">
+          <button class="btn-primary" id="btnBackDash">Back to Dashboard</button>
+          <button class="btn-ghost" id="btnViewHistory">View History</button>
+        </div>
+      </div>
+
+      <!-- HISTORY PAGE -->
+      <div id="historySection" class="section">
+        <h2>Your Attempts</h2>
+        <div id="historyList" class="muted"></div>
+        <div style="margin-top:12px">
+          <button class="btn-ghost" id="btnBackFromHistory">Back</button>
+        </div>
+      </div>
+
+    </section>
+  </div>
+</main>
+
+<footer>Local demo — data stored in your browser. To make production-grade: migrate auth & db to Firebase or a proper backend.</footer>
+
+<script>
+/* ============================
+  CLIENT-SIDE APP LOGIC (Phase 1)
+   - localStorage users & attempts
+   - password hashing via Web Crypto (SHA-256)
+   - random test generator with difficulty mix
+   - timer, auto-submit, scoring
+   - leaderboard & history
+   - sample question bank embedded
+   ============================ */
+
+/* ---------- Utilities ---------- */
+const $ = id => document.getElementById(id);
+const nowISO = () => (new Date()).toISOString();
+
+async function sha256(text){
+  const enc = new TextEncoder();
+  const data = enc.encode(text);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  // convert to hex
+  const h = Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
+  return h;
+}
+
+/* ---------- Local storage keys ---------- */
+const USERS_KEY = 'mba_users_v1';       // stores array of {id, name, email, passHash, createdAt}
+const ATTEMPTS_KEY = 'mba_attempts_v1'; // stores array of attempts
+const SESSION_KEY = 'mba_session_v1';   // current logged-in user id
+const QUESTIONS_KEY = 'mba_questions_v1'; // optional: to persist custom bank
+
+/* ---------- Sample question bank (you can extend) ---------- */
+/* Each question: id, question_text, options(array), correct_answer (exact string), section (VARC|DILR|QA), difficulty (easy|medium|hard), year(optional) */
+const SAMPLE_QUESTIONS = [
+  // VARC (reading/para)
+  { id: "v1", question_text: "VARC Q1: Choose the best inference from the passage: 'Markets respond to incentives.'", 
+    options:["Markets never fail","Markets adjust to signals","Markets are perfect","Markets are government-free"], correct_answer:"Markets adjust to signals", section:"VARC", difficulty:"easy", year:2020 },
+  { id: "v2", question_text: "VARC Q2: Which tone best fits a critical review?", 
+    options:["Admiring","Neutral","Skeptical","Comedic"], correct_answer:"Skeptical", section:"VARC", difficulty:"easy", year:2019 },
+
+  // DILR
+  { id: "d1", question_text: "DILR Q1: If 5 machines produce 200 units in 4 hours, how many machines for 500 units in 5 hours?",
+    options:["10","8","6","12"], correct_answer:"10", section:"DILR", difficulty:"medium", year:2018 },
+  { id: "d2", question_text: "DILR Q2: A sequence 2,4,8, ... what's the 6th term?",
+    options:["32","64","128","16"], correct_answer:"64", section:"DILR", difficulty:"easy", year:2017 },
+
+  // QA (quant)
+  { id: "q1", question_text: "QA Q1: 12% of 250 = ?",
+    options:["30","25","32","28"], correct_answer:"30", section:"QA", difficulty:"easy", year:2016 },
+  { id: "q2", question_text: "QA Q2: Solve: 15 * 14 - 14 * 4 = ?",
+    options:["154","140","154","154"], correct_answer:"154", section:"QA", difficulty:"medium", year:2015 },
+
+  // more to mix difficulty
+  { id: "q3", question_text: "QA Q3: If x^2 - 5x + 6 = 0, find x.",
+    options:["2,3","-2,-3","1,6","None"], correct_answer:"2,3", section:"QA", difficulty:"easy", year:2014 },
+  { id: "d3", question_text: "DILR Q3: In a network, A connects to B and C; shortest path problem complexity?",
+    options:["Linear","Polynomial","NP-hard","Trivial"], correct_answer:"NP-hard", section:"DILR", difficulty:"hard", year:2021 },
+
+  { id: "v3", question_text: "VARC Q3: Choose the most appropriate title for a passage about supply chains.",
+    options:["The Art of Cooking","Global Supply Chain Dynamics","Romantic Novels","Climate Change"], correct_answer:"Global Supply Chain Dynamics", section:"VARC", difficulty:"medium", year:2018 },
+
+  // add duplicates with different ids for counts
+  { id: "v4", question_text: "VARC Q4: Which is a central theme of an essay on urbanization?",
+    options:["Agriculture","Urban Growth","Space Travel","Poetry"], correct_answer:"Urban Growth", section:"VARC", difficulty:"easy", year:2013 },
+
+  { id: "q4", question_text: "QA Q4: If average of 5 numbers is 20 and four are 18, 22, 20, 24. Find the 5th.",
+    options:["20","18","24","16"], correct_answer:"20", section:"QA", difficulty:"medium", year:2012 },
+
+  { id: "d4", question_text: "DILR Q4: From a dataset of 100 pairs, correlation 0.8 indicates?",
+    options:["Strong positive","Strong negative","No relation","Moderate negative"], correct_answer:"Strong positive", section:"DILR", difficulty:"medium", year:2011 },
+
+  { id: "v5", question_text: "VARC Q5: A passage arguing for regulation would most likely emphasize:",
+    options:["Free market benefits","Risks and externalities","Entertainment value","Fashion trends"], correct_answer:"Risks and externalities", section:"VARC", difficulty:"medium", year:2022 },
+
+  // generate more simple items to ensure enough pool for small tests:
+  { id: "qa_easy_1", question_text: "QA: 5 + 7 = ?",
+    options:["10","11","12","13"], correct_answer:"12", section:"QA", difficulty:"easy" },
+  { id: "qa_easy_2", question_text: "QA: 9 - 3 = ?",
+    options:["7","6","5","4"], correct_answer:"6", section:"QA", difficulty:"easy" },
+  { id: "dlr_easy_1", question_text: "DILR: If A>B and B>C then A>C? (True/False)",
+    options:["True","False","Cannot say","Sometimes"], correct_answer:"True", section:"DILR", difficulty:"easy" },
+  { id: "varc_easy_1", question_text: "VARC: The antonym of 'ambiguous' is:",
+    options:["Clear","Vague","Dark","Mysterious"], correct_answer:"Clear", section:"VARC", difficulty:"easy" }
+];
+
+// initialize question bank in localStorage if not present
+function ensureQuestions(){
+  const existing = JSON.parse(localStorage.getItem(QUESTIONS_KEY) || "null");
+  if(!existing){
+    localStorage.setItem(QUESTIONS_KEY, JSON.stringify(SAMPLE_QUESTIONS));
+  }
+}
+ensureQuestions();
+function getAllQuestions(){
+  return JSON.parse(localStorage.getItem(QUESTIONS_KEY) || "[]");
+}
+
+/* ---------- User management ---------- */
+function getUsers(){ return JSON.parse(localStorage.getItem(USERS_KEY) || "[]"); }
+function saveUsers(list){ localStorage.setItem(USERS_KEY, JSON.stringify(list)); }
+
+function getAttempts(){ return JSON.parse(localStorage.getItem(ATTEMPTS_KEY) || "[]"); }
+function saveAttempts(list){ localStorage.setItem(ATTEMPTS_KEY, JSON.stringify(list)); }
+
+async function register(name,email,password){
+  const users = getUsers();
+  if(users.find(u=>u.email.toLowerCase()===email.toLowerCase())) throw new Error("Email already registered");
+  const passHash = await sha256(password);
+  const id = 'u_' + Date.now();
+  const user = { id, name, email: email.toLowerCase(), passHash, createdAt: nowISO() };
+  users.push(user);
+  saveUsers(users);
+  localStorage.setItem(SESSION_KEY, id);
+  return user;
+}
+
+async function login(email,password){
+  const users = getUsers();
+  const user = users.find(u=>u.email.toLowerCase()===email.toLowerCase());
+  if(!user) throw new Error("No user found with this email");
+  const passHash = await sha256(password);
+  if(passHash !== user.passHash) throw new Error("Incorrect password");
+  localStorage.setItem(SESSION_KEY, user.id);
+  return user;
+}
+
+function logout(){
+  localStorage.removeItem(SESSION_KEY);
+}
+
+/* ---------- Session helpers ---------- */
+function currentUser(){
+  const id = localStorage.getItem(SESSION_KEY);
+  if(!id) return null;
+  return getUsers().find(u=>u.id===id) || null;
+}
+
+/* ---------- UI wiring ---------- */
+/* left auth */
+$('btnShowLogin').onclick = () => {
+  $('guestView').style.display='none'; $('loginView').style.display='block'; $('authMsg').textContent='';
+};
+$('btnShowRegister').onclick = () => {
+  $('guestView').style.display='block'; $('loginView').style.display='none'; $('loginMsg').textContent='';
+};
+
+$('btnRegister').onclick = async () => {
+  $('authMsg').textContent = '';
+  const name = $('inpName').value.trim();
+  const email = $('inpEmail').value.trim();
+  const pass = $('inpPass').value;
+  if(!name || !email || !pass){ $('authMsg').textContent = 'All fields required'; return; }
+  try{
+    const user = await register(name,email,pass);
+    $('authMsg').textContent = 'Registered. Starting session...';
+    setTimeout(()=>updateUIForUser(user),600);
+  }catch(e){
+    $('authMsg').textContent = e.message;
+  }
+};
+
+$('btnLogin').onclick = async () => {
+  $('loginMsg').textContent = '';
+  const email = $('loginEmail').value.trim();
+  const pass = $('loginPass').value;
+  if(!email || !pass){ $('loginMsg').textContent = 'Provide email & password'; return; }
+  try{
+    const user = await login(email,pass);
+    $('loginMsg').textContent = 'Logged in.';
+    setTimeout(()=>updateUIForUser(user),400);
+  }catch(e){
+    $('loginMsg').textContent = e.message;
+  }
+};
+
+$('btnLogout').onclick = () => { logout(); refreshUI(); };
+$('btnLogout2').onclick = () => { logout(); refreshUI(); };
+
+/* header nav */
+$('btnHome').onclick = () => showSection('homeSection');
+$('btnDashboard').onclick = () => showSection('homeSection');
+$('btnHistory').onclick = () => showSection('historySection');
+
+/* quick actions */
+$('btnStart').onclick = () => showSection('homeSection') || window.scrollTo(0,0);
+$('btnCreateTest').onclick = () => startTestFlow();
+$('btnHistory').onclick = () => showSection('historySection');
+
+/* results navigation */
+$('btnBackDash').onclick = () => showSection('homeSection');
+$('btnViewHistory').onclick = () => showSection('historySection');
+$('btnBackFromHistory').onclick = () => showSection('homeSection');
+
+/* prev/next/submit in test */
+$('btnPrev').onclick = () => gotoQuestion(currentIndex-1);
+$('btnNext').onclick = () => gotoQuestion(currentIndex+1);
+$('btnSubmit').onclick = () => confirmSubmit();
+
+/* history action in left panel */
+$('btnHistory').onclick = () => { showSection('historySection'); renderHistory(); };
+
+/* ---------- App functions ---------- */
+function refreshUI(){
+  const user = currentUser();
+  if(user){
+    $('guestView').style.display='none';
+    $('loginView').style.display='none';
+    $('userBox').style.display='block';
+    $('authBox').style.display='block';
+    $('navEmail').textContent = user.email;
+    $('profileName').textContent = user.name;
+    $('profileEmail').textContent = user.email;
+    $('avatar').textContent = (user.name||'U').split(' ').map(x=>x[0]).slice(0,2).join('').toUpperCase();
+    $('btnLogout').style.display = 'inline-block';
+    $('btnLogout2').style.display = 'inline-block';
+    populateLeaderboard();
+  } else {
+    $('guestView').style.display='block';
+    $('loginView').style.display='none';
+    $('userBox').style.display='none';
+    $('navEmail').textContent = '';
+    $('btnLogout').style.display = 'none';
+  }
+}
+
+/* initial render */
+refreshUI();
+showSection('homeSection');
+
+/* ---------- Section helpers ---------- */
+function showSection(id){
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+  // if history open, refresh
+  if(id==='historySection') renderHistory();
+}
+
+/* ---------- Difficulty rules ---------- */
+const RULES = {
+  easy: { easy: 0.8, medium: 0.2, hard: 0 },
+  medium: { easy: 0.4, medium: 0.5, hard: 0.1 },
+  hard: { easy: 0.15, medium: 0.25, hard: 0.6 }
+};
+
+/* ---------- Test engine ---------- */
+let currentTest = []; // array of questions
+let currentAnswers = {}; // qid -> selected option (string)
+let currentIndex = 0;
+let timerInterval = null;
+let timeRemainingSec = 0;
+
+function startTestFlow(){
+  // determine pattern
+  const patternChoice = $('selPattern').value;
+  let varc=24, dlr=20, qa=22;
+  if(patternChoice==='mini'){ varc=6; dlr=5; qa=6; }
+  if(patternChoice==='custom'){
+    varc = parseInt($('inpVarc').value) || 0;
+    dlr = parseInt($('inpDlr').value) || 0;
+    qa = parseInt($('inpQa').value) || 0;
+  }
+  // difficulty
+  const difficulty = $('selDifficulty').value;
+  // duration
+  const mins = parseInt($('inpMinutes').value) || 120;
+  const shuffle = $('selShuffle').value === 'true';
+
+  // generate
+  const pattern = { VARC:varc, DILR:dlr, QA:qa };
+  const generated = generateTest(pattern, difficulty, shuffle);
+  if(generated.length===0){
+    alert('No questions available for selected pattern/difficulty. Add questions to bank or reduce counts.');
+    return;
+  }
+  currentTest = generated;
+  currentAnswers = {};
+  currentIndex = 0;
+  $('statCount').textContent = 'Questions: ' + currentTest.length;
+  // set timer
+  timeRemainingSec = mins * 60;
+  startTimer();
+  renderQuestion();
+  // show test section
+  $('totalQ').textContent = currentTest.length;
+  $('curQ').textContent = currentIndex+1;
+  $('testMeta').textContent = `Pattern: VARC ${varc}, DILR ${dlr}, QA ${qa} • Difficulty: ${difficulty}`;
+  showSection('testSection');
+}
+
+/* generateTest: picks questions from bank according to pattern & difficulty mix */
+function generateTest(pattern, difficulty, shuffle=true){
+  const all = getAllQuestions();
+  const dist = RULES[difficulty] || RULES.medium;
+  const final = [];
+
+  for(const section of Object.keys(pattern)){
+    const total = pattern[section] || 0;
+    if(total <= 0) continue;
+    const easyCount = Math.floor(total * dist.easy);
+    const medCount = Math.floor(total * dist.medium);
+    const hardCount = total - easyCount - medCount;
+
+    const poolEasy = all.filter(q=>q.section===section && q.difficulty==='easy');
+    const poolMed  = all.filter(q=>q.section===section && q.difficulty==='medium');
+    const poolHard = all.filter(q=>q.section===section && q.difficulty==='hard');
+
+    final.push(...pickRandom(poolEasy, easyCount));
+    final.push(...pickRandom(poolMed, medCount));
+    final.push(...pickRandom(poolHard, hardCount));
+  }
+
+  // if not enough questions to satisfy counts, try to fill with remaining pool
+  if(final.length < Object.values(pattern).reduce((a,b)=>a+b,0)){
+    // gather remaining pool across sections/difficulties
+    const remaining = all.filter(q => !final.some(f=>f.id===q.id));
+    const fillCount = Object.values(pattern).reduce((a,b)=>a+b,0) - final.length;
+    final.push(...pickRandom(remaining, fillCount));
+  }
+
+  if(shuffle) return shuffleArray(final);
+  return final;
+}
+
+/* helper: pick n random from array */
+function pickRandom(arr,n){
+  if(!arr || arr.length===0) return [];
+  const copy = arr.slice();
+  shuffleArray(copy);
+  return copy.slice(0, Math.min(n, copy.length));
+}
+function shuffleArray(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
+
+/* ---------- Timer ---------- */
+function startTimer(){
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(()=>{
+    timeRemainingSec--;
+    if(timeRemainingSec<=0){
+      clearInterval(timerInterval);
+      autoSubmitDueToTime();
+    } else {
+      updateTimerDisplay();
+    }
+  },1000);
+}
+function updateTimerDisplay(){
+  const h = Math.floor(timeRemainingSec / 3600);
+  const m = Math.floor((timeRemainingSec % 3600) / 60);
+  const s = timeRemainingSec % 60;
+  $('timerDisplay').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function autoSubmitDueToTime(){
+  alert('Time is up. Test will be submitted automatically.');
+  finalizeTest('Time up');
+}
+
+/* ---------- Rendering question ---------- */
+function renderQuestion(){
+  const container = $('questionContainer');
+  if(!currentTest || currentTest.length===0){ container.innerHTML = '<div class="muted">No questions loaded.</div>'; return; }
+  const q = currentTest[currentIndex];
+  $('curQ').textContent = currentIndex+1;
+  $('totalQ').textContent = currentTest.length;
+
+  let html = `<div class="qmeta">${q.section} • ${q.difficulty} ${q.year ? ' • '+q.year : ''}</div>`;
+  html += `<div style="margin-top:8px"><strong>${q.question_text}</strong></div>`;
+  html += `<div class="options">`;
+  (q.options || []).forEach(opt=>{
+    const selected = currentAnswers[q.id] === opt ? 'selected' : '';
+    html += `<button class="${selected}" data-qid="${q.id}" data-opt="${encodeURIComponent(opt)}">${opt}</button>`;
+  });
+  html += `</div>`;
+  container.innerHTML = html;
+
+  // wire option buttons
+  container.querySelectorAll('.options button').forEach(btn=>{
+    btn.onclick = ()=>{
+      const qid = btn.getAttribute('data-qid');
+      const opt = decodeURIComponent(btn.getAttribute('data-opt'));
+      currentAnswers[qid] = opt;
+      // update selected classes
+      container.querySelectorAll('.options button').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+  });
+
+  // update prev/next disabled states
+  $('btnPrev').disabled = currentIndex === 0;
+  $('btnNext').disabled = currentIndex >= currentTest.length-1;
+}
+
+/* navigate */
+function gotoQuestion(i){
+  if(i < 0 || i >= currentTest.length) return;
+  currentIndex = i;
+  renderQuestion();
+}
+
+/* submit flow */
+function confirmSubmit(){
+  if(!confirm('Submit test? You cannot change answers after submission.')) return;
+  finalizeTest('Submitted');
+}
+
+/* finalize: evaluate and save */
+function finalizeTest(reason){
+  clearInterval(timerInterval);
+  // evaluate
+  let correct = 0, attempted = 0;
+  const details = [];
+  currentTest.forEach(q=>{
+    const given = currentAnswers[q.id] || null;
+    if(given) attempted++;
+    const isCorrect = given && q.correct_answer && String(given).trim() === String(q.correct_answer).trim();
+    if(isCorrect) correct++;
+    details.push({ id: q.id, question: q.question_text, given, correct_answer: q.correct_answer, isCorrect, section: q.section, difficulty: q.difficulty });
+  });
+  const score = correct;
+  const total = currentTest.length;
+  const percent = ((score/total)*100).toFixed(2);
+
+  const attempt = {
+    id: 'a_' + Date.now(),
+    userId: currentUser() ? currentUser().id : null,
+    userEmail: currentUser() ? currentUser().email : 'guest',
+    createdAt: nowISO(),
+    score, total, percent, attempted, details, reason
+  };
+
+  const attempts = getAttempts();
+  attempts.push(attempt);
+  saveAttempts(attempts);
+
+  showResults(attempt);
+  populateLeaderboard();
+}
+
+/* show results */
+function showResults(attempt){
+  const box = $('resultsBox');
+  const det = $('resultsDetails');
+  box.innerHTML = `<div><strong>Score: ${attempt.score}/${attempt.total}</strong> • ${attempt.percent}%</div>
+                   <div class="muted">Attempted: ${attempt.attempted} • ${new Date(attempt.createdAt).toLocaleString()}</div>`;
+  // details: show per-question summary (collapsed)
+  let html = '<div style="margin-top:10px">';
+  attempt.details.forEach((d,i)=>{
+    html += `<div style="margin-top:8px;padding:10px;border-radius:8px;background:#fbfbff;border:1px solid #f1f3ff">
+      <div style="font-weight:600">${i+1}. ${escapeHtml(d.question)}</div>
+      <div class="muted">Given: ${d.given || '<i>Not answered</i>'} &nbsp; | &nbsp; Correct: ${d.correct_answer}</div>
+      <div style="margin-top:6px;color:${d.isCorrect ? 'var(--success)' : 'var(--danger)'}">${d.isCorrect ? 'Correct' : 'Incorrect'}</div>
+    </div>`;
+  });
+  html += '</div>';
+  det.innerHTML = html;
+  showSection('resultsSection');
+}
+
+/* renderHistory for current user */
+function renderHistory(){
+  const user = currentUser();
+  const all = getAttempts();
+  const filtered = user ? all.filter(a=>a.userId===user.id) : all;
+  const list = $('historyList');
+  if(filtered.length===0){ list.innerHTML = '<div class="muted">No attempts yet.</div>'; return; }
+  let html = '';
+  filtered.slice().reverse().forEach(a=>{
+    html += `<div class="history-item">
+      <div style="display:flex;justify-content:space-between">
+        <div><strong>${a.score}/${a.total}</strong> • ${a.percent}%</div>
+        <div class="muted">${new Date(a.createdAt).toLocaleString()}</div>
+      </div>
+      <div class="muted">Attempted: ${a.attempted} • ${a.reason}</div>
+    </div>`;
+  });
+  list.innerHTML = html;
+}
+
+/* populate leaderboard (top scores across users) */
+function populateLeaderboard(){
+  const allAttempts = getAttempts();
+  const users = getUsers();
+  // compute best score per user
+  const bestByUser = {};
+  allAttempts.forEach(a=>{
+    if(!a.userId) return;
+    if(!bestByUser[a.userId] || a.percent > bestByUser[a.userId].percent){
+      bestByUser[a.userId] = a;
+    }
+  });
+  // create rows sorted by percent desc
+  const rows = Object.keys(bestByUser).map(uid=>{
+    const att = bestByUser[uid];
+    const user = users.find(u=>u.id===uid) || { name: att.userEmail };
+    return { uid, name: user.name || user.email, percent: parseFloat(att.percent), score: att.score, total: att.total };
+  }).sort((a,b)=>b.percent - a.percent);
+
+  const box = $('leaderboardBox');
+  if(rows.length===0){ box.innerHTML = '<div class="muted">No leaderboard data yet.</div>'; return; }
+  let html = '';
+  rows.slice(0,10).forEach(r=>{
+    html += `<div class="leaderboard-row"><div style="font-weight:600">${escapeHtml(r.name)}</div><div class="muted">${r.score}/${r.total} • ${r.percent}%</div></div>`;
+  });
+  box.innerHTML = html;
+}
+
+/* ---------- small helpers ---------- */
+function escapeHtml(s){ if(!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+/* ---------- initial calls ---------- */
+populateLeaderboard();
+
+/* ---------- misc: auto-fill some inputs for demo convenience ---------- */
+$('inpMinutes').value = '60';
+$('inpVarc').value = '24';
+$('inpDlr').value = '20';
+$('inpQa').value = '22';
+
+/* ---------- Extra: allow editing pattern when custom selected ---------- */
+$('selPattern').addEventListener('change', (e)=>{
+  if(e.target.value==='custom') $('customCounts').style.display='block'; else $('customCounts').style.display='none';
+});
+
+/* ---------- ensure UI shows login state ---------- */
+refreshUI();
+populateLeaderboard();
+
+/* ---------- Utility to add questions via console (dev) ----------
+   Example: localStorage.setItem('mba_questions_v1', JSON.stringify([...existing, newQuestion]));
+   newQuestion must have id, question_text, options, correct_answer, section, difficulty.
+-------------------------------------------------------------- */
+
+</script>
+</body>
+</html>
